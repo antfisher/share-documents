@@ -28,7 +28,7 @@ public class FilesController {
     }
 
     @PostMapping(value = "/upload")
-    public ResponseEntity<FileUploadResponseDTO> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<FileUploadResponseDTO> uploadFile(@RequestParam("file") MultipartFile file) {
 
         try {
             String filePath = fileService.saveFileInFileSystem(file);

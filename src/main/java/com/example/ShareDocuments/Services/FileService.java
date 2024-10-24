@@ -4,18 +4,11 @@ import com.example.ShareDocuments.DTO.CreateFileDto;
 import com.example.ShareDocuments.Entities.File;
 import com.example.ShareDocuments.Entities.User;
 import com.example.ShareDocuments.Repositories.FileRepository;
-import com.example.ShareDocuments.Repositories.UserRepository;
 import jakarta.servlet.ServletContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -23,7 +16,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
-import java.util.List;
 
 @Service
 public class FileService {
@@ -31,8 +23,8 @@ public class FileService {
     @Autowired
     ServletContext context;
 
-    private UserService userService;
-    private FileRepository fileRepository;
+    private final UserService userService;
+    private final FileRepository fileRepository;
 
     public FileService(UserService userService, FileRepository fileRepository) {
         this.userService = userService;

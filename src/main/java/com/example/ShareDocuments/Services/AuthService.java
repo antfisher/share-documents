@@ -4,7 +4,6 @@ import com.example.ShareDocuments.DTO.SignUpDto;
 import com.example.ShareDocuments.Entities.User;
 import com.example.ShareDocuments.Exceptions.InvalidJwtException;
 import com.example.ShareDocuments.Repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

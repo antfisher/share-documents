@@ -5,7 +5,7 @@ public enum UserRole {
     ADMIN("admin"),
     USER("user");
 
-    private String role;
+    private final String role;
 
     UserRole(String role) {
         this.role = role;
@@ -13,5 +13,9 @@ public enum UserRole {
 
     public String getValue() {
         return role;
+    }
+
+    public boolean isAdmin() {
+        return role.equals("admin");
     }
 }
