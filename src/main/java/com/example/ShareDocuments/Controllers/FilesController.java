@@ -1,6 +1,7 @@
 package com.example.ShareDocuments.Controllers;
 
 import com.example.ShareDocuments.DTO.CreateFileDto;
+import com.example.ShareDocuments.DTO.FileResponseDto;
 import com.example.ShareDocuments.DTO.FileUploadResponseDTO;
 import com.example.ShareDocuments.Entities.File;
 import com.example.ShareDocuments.Entities.User;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/files")
@@ -39,16 +41,18 @@ public class FilesController {
     }
 
     @GetMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody Collection<File> getFiles() {
+    public @ResponseBody Collection<FileResponseDto> getFiles() {
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) auth.getPrincipal();
-        return user.getFiles();
+        List<File> files = fileService.getFilesByUserId(user.getId());
+        return files.stream().map(FileResponseDto::fromFile).toList();
     }
 
     @PostMapping(value = "/")
-    public ResponseEntity<File> createFile(@RequestBody @Valid CreateFileDto data) {
+    public ResponseEntity<FileResponseDto> createFile(@RequestBody @Valid CreateFileDto data) {
 
-        File file = fileService.createFile(data);
+        FileResponseDto file = fileService.createFile(data);
 
         return ResponseEntity.ok(file);
     }

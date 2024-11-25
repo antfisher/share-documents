@@ -1,5 +1,6 @@
 package com.example.ShareDocuments.Entities;
 
+import com.example.ShareDocuments.DTO.UserDto;
 import com.example.ShareDocuments.Enums.UserRole;
 import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
@@ -81,5 +82,9 @@ public class User implements UserDetails {
     @Transactional
     public Collection<File> getFiles() {
         return files;
+    }
+
+    public UserDto getUserDto() {
+        return new UserDto(id, login, password, role);
     }
 }

@@ -1,11 +1,14 @@
 package com.example.ShareDocuments.Services;
 
 import com.example.ShareDocuments.DTO.CreateFileDto;
+import com.example.ShareDocuments.DTO.FileResponseDto;
 import com.example.ShareDocuments.Entities.File;
 import com.example.ShareDocuments.Entities.User;
 import com.example.ShareDocuments.Repositories.FileRepository;
 import jakarta.servlet.ServletContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
+import java.util.List;
 
 @Service
 public class FileService {
@@ -52,29 +56,23 @@ public class FileService {
         }
     }
 
-
-    public File createFile(CreateFileDto createFileDto) {
+    public FileResponseDto createFile(CreateFileDto createFileDto) {
         File file = new File();
         file.setName(createFileDto.name());
         file.setType(createFileDto.type());
         file.setPath(createFileDto.path());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+        file.setOwner(user);
 
         fileRepository.save(file);
 
-        return file;
+        FileResponseDto fileResponseDto = new FileResponseDto(file.getId(), file.getPath(), file.getName(), file.getType(), file.getOwner().getId());
+
+        return fileResponseDto;
     }
-//
-//    @GetMapping("/download")
-//    public ResponseEntity<Resource> download(String param) throws IOException {
-//
-//        // ...
-//
-//        InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
-//
-//        return ResponseEntity.ok()
-//                .headers(headers)
-//                .contentLength(file.length())
-//                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-//                .body(resource);
-//    }
+
+    public List<File> getFilesByUserId(Long userId) {
+        return fileRepository.findByOwnerId(userId);
+    }
 }

@@ -16,10 +16,13 @@ import java.io.IOException;
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 
-    @Autowired
     TokenProvider tokenService;
-    @Autowired
     UserRepository userRepository;
+
+    SecurityFilter(TokenProvider tokenService, UserRepository userRepository) {
+        this.userRepository = userRepository;
+        this.tokenService = tokenService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

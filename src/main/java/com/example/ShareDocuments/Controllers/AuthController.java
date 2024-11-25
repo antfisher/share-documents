@@ -4,7 +4,9 @@ import com.example.ShareDocuments.Config.Auth.TokenProvider;
 import com.example.ShareDocuments.DTO.JwtDto;
 import com.example.ShareDocuments.DTO.SignInDto;
 import com.example.ShareDocuments.DTO.SignUpDto;
+import com.example.ShareDocuments.DTO.UserDto;
 import com.example.ShareDocuments.Entities.User;
+import com.example.ShareDocuments.Repositories.UserRepository;
 import com.example.ShareDocuments.Services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,39 +20,36 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    @Autowired
     private AuthenticationManager authenticationManager;
-    @Autowired
     private AuthService service;
-    @Autowired
     private TokenProvider tokenService;
+    private UserRepository userRepository;
+
+    AuthController(AuthenticationManager authenticationManager, AuthService service, TokenProvider tokenService, UserRepository userRepository) {
+        this.authenticationManager = authenticationManager;
+        this.service = service;
+        this.tokenService = tokenService;
+        this.userRepository = userRepository;
+    }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@RequestBody @Valid SignUpDto data) {
-        service.signUp(data);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<UserDto> signUp(@RequestBody @Valid SignUpDto data) {
+        UserDto user = service.signUp(data);
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping("/signin")
     public ResponseEntity<JwtDto> signIn(@RequestBody @Valid SignInDto data) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
         var authUser = authenticationManager.authenticate(usernamePassword);
-        var accessToken = tokenService.generateAccessToken((User) authUser.getPrincipal());
-        return ResponseEntity.ok(new JwtDto(accessToken));
+        var user = (User) authUser.getPrincipal();
+        var accessToken = tokenService.generateAccessToken(user);
+        var refreshToken = tokenService.generateRefreshToken(user);
+        return ResponseEntity.ok(new JwtDto(accessToken, refreshToken));
     }
 
-    @GetMapping("/info")
-    public String info()
-    {
-        String str2
-                = "<html><body><font color=\"green\">"
-                + "<h2>GeeksForGeeks is a Computer"
-                + " Science portal for Geeks. "
-                + "This portal has been "
-                + "created to provide well written, "
-                + "well thought and well explained "
-                + "solutions for selected questions."
-                + "</h2></font></body></html>";
-        return str2;
+    @GetMapping("/user")
+    public User getUser(@RequestParam Long id) {
+        return userRepository.findUserById(id);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.ShareDocuments.Services;
 
 import com.example.ShareDocuments.DTO.SignUpDto;
+import com.example.ShareDocuments.DTO.UserDto;
 import com.example.ShareDocuments.Entities.User;
 import com.example.ShareDocuments.Exceptions.InvalidJwtException;
 import com.example.ShareDocuments.Repositories.UserRepository;
@@ -24,12 +25,13 @@ public class AuthService implements UserDetailsService {
         return repository.findByLogin(username);
     }
 
-    public UserDetails signUp(SignUpDto data) throws InvalidJwtException {
+    public UserDto signUp(SignUpDto data) throws InvalidJwtException {
         if (repository.findByLogin(data.login()) != null) {
             throw new InvalidJwtException("Username already exists");
         }
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
         User newUser = new User(data.login(), encryptedPassword, data.role());
-        return repository.save(newUser);
+        repository.save(newUser);
+        return newUser.getUserDto();
     }
 }

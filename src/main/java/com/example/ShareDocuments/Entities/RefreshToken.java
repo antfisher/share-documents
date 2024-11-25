@@ -1,7 +1,5 @@
 package com.example.ShareDocuments.Entities;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,19 +8,14 @@ import lombok.NoArgsConstructor;
 
 @Table()
 @Data
-@Entity(name = "files")
+@Entity(name = "refresh_token")
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "id")
-public class File {
+@EqualsAndHashCode(of = "token")
+public class RefreshToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String path;
-    private String name;
-    private String type;
+    String token;
 
     @ManyToOne
     @JoinColumn(
