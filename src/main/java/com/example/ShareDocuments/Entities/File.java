@@ -8,6 +8,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+import java.util.Set;
+
 @Table()
 @Data
 @Entity(name = "files")
@@ -30,4 +33,12 @@ public class File {
             referencedColumnName = "id"
     )
     private User owner;
+
+    @ManyToMany
+    @JoinTable(
+            name = "coworkers",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "file_id")
+    )
+    private Set<User> coworkers;
 }

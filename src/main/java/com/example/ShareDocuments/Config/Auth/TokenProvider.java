@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.example.ShareDocuments.Entities.RefreshToken;
 import com.example.ShareDocuments.Entities.User;
 import com.example.ShareDocuments.Repositories.RefreshTokenRepository;
 import com.example.ShareDocuments.Services.RefreshTokenService;
@@ -43,6 +44,7 @@ public class TokenProvider {
         try {
             Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET);
             String refreshToken = JWT.create()
+                    .withSubject(user.getUsername())
                     .withExpiresAt(genRefreshExpirationDate())
                     .sign(algorithm);
             refreshTokenService.createToken(refreshToken, user);
@@ -74,6 +76,13 @@ public class TokenProvider {
         } catch (JWTVerificationException exception) {
             throw new JWTVerificationException("Error while validating token", exception);
         }
+    }
+
+    public String getNewAccessToken(String refreshToken) {
+        String token = validateRefreshToken(refreshToken);
+        RefreshToken refreshTokenEntity = refreshTokenService.getRefreshToken(refreshToken);
+        User user = refreshTokenEntity.getOwner();
+        return generateAccessToken(user);
     }
 
     private Instant genAccessExpirationDate() {

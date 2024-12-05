@@ -1,15 +1,9 @@
 package com.example.ShareDocuments.Controllers;
 
 import com.example.ShareDocuments.Config.Auth.TokenProvider;
-import com.example.ShareDocuments.DTO.JwtDto;
-import com.example.ShareDocuments.DTO.SignInDto;
-import com.example.ShareDocuments.DTO.SignUpDto;
-import com.example.ShareDocuments.DTO.UserDto;
+import com.example.ShareDocuments.DTO.*;
 import com.example.ShareDocuments.Entities.User;
-import com.example.ShareDocuments.Repositories.UserRepository;
 import com.example.ShareDocuments.Services.AuthService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,13 +17,11 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
     private AuthService service;
     private TokenProvider tokenService;
-    private UserRepository userRepository;
 
-    AuthController(AuthenticationManager authenticationManager, AuthService service, TokenProvider tokenService, UserRepository userRepository) {
+    AuthController(AuthenticationManager authenticationManager, AuthService service, TokenProvider tokenService) {
         this.authenticationManager = authenticationManager;
         this.service = service;
         this.tokenService = tokenService;
-        this.userRepository = userRepository;
     }
 
     @PostMapping("/signup")
@@ -48,8 +40,10 @@ public class AuthController {
         return ResponseEntity.ok(new JwtDto(accessToken, refreshToken));
     }
 
-    @GetMapping("/user")
-    public User getUser(@RequestParam Long id) {
-        return userRepository.findUserById(id);
+    @PostMapping("/refresh")
+    public ResponseEntity<JwtDto> refresh(@RequestBody @Valid RefreshTokenDto data) {
+        String refreshToken = data.refreshToken();
+        var accessToken = tokenService.getNewAccessToken(refreshToken);
+        return ResponseEntity.ok(new JwtDto(accessToken, refreshToken));
     }
 }

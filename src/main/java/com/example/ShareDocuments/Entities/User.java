@@ -10,11 +10,15 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Table()
 @Entity(name = "users")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
@@ -23,17 +27,20 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String login;
-
     private String password;
+    private String firstName;
+    private String lastName;
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
     @Setter
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Collection<File> files;
+
+    @ManyToMany(mappedBy = "coworkers", fetch = FetchType.EAGER)
+    private Set<File> sharedFiles;
 
     public User(String login, String password, UserRole role) {
         this.login = login;
@@ -85,6 +92,24 @@ public class User implements UserDetails {
     }
 
     public UserDto getUserDto() {
-        return new UserDto(id, login, password, role);
+        Set<String> sharedFiles = Collections.emptySet();
+
+        if (this.sharedFiles != null) {
+            try {
+                sharedFiles = this.sharedFiles.stream().map(f -> f.getPath()).collect(Collectors.toSet());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return new UserDto(
+                id,
+                login,
+                firstName,
+                lastName,
+                role,
+                files.stream().map(f -> f.getPath()).collect(Collectors.toSet()),
+                sharedFiles
+        );
     }
 }

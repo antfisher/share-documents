@@ -19,4 +19,8 @@ public class RefreshTokenService {
         repository.save(refreshToken);
         return refreshToken;
     }
+
+    public RefreshToken getRefreshToken(String token) {
+        return repository.findByToken(token);
+    }
 }
