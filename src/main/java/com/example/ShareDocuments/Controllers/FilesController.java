@@ -58,12 +58,12 @@ public class FilesController {
     public ResponseEntity<FileResponseDto> createFile(@RequestBody @Valid CreateFileDto data) {
 
         FileResponseDto file = fileService.createFile(data);
-
         return ResponseEntity.ok(file);
     }
 
     @GetMapping(value = "/{id}")
     public ResponseEntity<FileResponseDto> getFileById(@PathVariable("id") Long id) {
+
         File file = fileService.getFileById(id);
         if (file == null) {
             return ResponseEntity.notFound().build();
@@ -73,6 +73,7 @@ public class FilesController {
 
     @GetMapping(value = "/download/{fileID}", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileID) {
+
         try {
             Resource resource = fileService.loadFile(fileID);
             if (resource.exists() || resource.isReadable()) {
@@ -87,7 +88,19 @@ public class FilesController {
 
     @PostMapping(value = "/share")
     public ResponseEntity<?> shareFile(@RequestBody @Valid ShareFileDto data) {
+
         fileService.addCoworkerToFile(data.fileId(), data.email());
         return ResponseEntity.ok("Coworker added successfully");
+    }
+
+    @DeleteMapping(value = "/{fileID}")
+    public ResponseEntity<?> deleteFile(@PathVariable Long fileID) {
+
+        try {
+            fileService.deleteFile(fileID);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

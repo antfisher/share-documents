@@ -80,6 +80,17 @@ public class FileService {
         return fileResponseDto;
     }
 
+    public void deleteFile(Long fileID) throws IOException {
+        File file = fileRepository.findById(fileID).orElse(null);
+
+        if (file != null) {
+            String filePathId = file.getPath();
+            Path filePath = resolvePathById(filePathId);
+            Files.delete(filePath);
+            fileRepository.delete(file);
+        }
+    }
+
     public List<File> getFilesByUserId(Long userId) {
         List<File> files = new ArrayList<>();
         files.addAll(fileRepository.findByOwnerId(userId));
