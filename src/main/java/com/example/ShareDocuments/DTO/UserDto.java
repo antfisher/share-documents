@@ -9,7 +9,5 @@ public record UserDto(
         String login,
         String firstName,
         String lastName,
-        UserRole role,
-        Set<String> files,
-        Set<String> sharedFiles) {
+        UserRole role) {
 }

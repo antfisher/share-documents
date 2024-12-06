@@ -3,9 +3,12 @@ package com.example.ShareDocuments.Services;
 import com.example.ShareDocuments.Config.WorkingDirProvider;
 import com.example.ShareDocuments.DTO.CreateFileDto;
 import com.example.ShareDocuments.DTO.FileResponseDto;
+import com.example.ShareDocuments.Entities.Coworker;
 import com.example.ShareDocuments.Entities.File;
 import com.example.ShareDocuments.Entities.User;
+import com.example.ShareDocuments.Enums.FileAuthority;
 import com.example.ShareDocuments.Repositories.FileRepository;
+import com.example.ShareDocuments.Repositories.UserRepository;
 import jakarta.servlet.ServletContext;
 import jakarta.transaction.Transactional;
 import org.springframework.core.io.Resource;
@@ -18,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
@@ -27,11 +31,13 @@ public class FileService {
 
     private final ServletContext context;
     private final UserService userService;
+    private final UserRepository userRepository;
     private final FileRepository fileRepository;
     private final WorkingDirProvider workingDirProvider;
 
-    public FileService(UserService userService, FileRepository fileRepository, ServletContext context, WorkingDirProvider workingDirProvider) {
+    public FileService(UserService userService, UserRepository userRepository,FileRepository fileRepository, ServletContext context, WorkingDirProvider workingDirProvider) {
         this.userService = userService;
+        this.userRepository = userRepository;
         this.fileRepository = fileRepository;
         this.context = context;
         this.workingDirProvider = workingDirProvider;
@@ -76,34 +82,64 @@ public class FileService {
                 file.getName(),
                 file.getType(),
                 file.getOwner().getId(),
-                Collections.emptySet());
+                Collections.emptySet()
+        );
         return fileResponseDto;
     }
 
+    @Transactional
     public void deleteFile(Long fileID) throws IOException {
         File file = fileRepository.findById(fileID).orElse(null);
 
         if (file != null) {
             String filePathId = file.getPath();
             Path filePath = resolvePathById(filePathId);
-            Files.delete(filePath);
-            fileRepository.delete(file);
+            try {
+                Files.delete(filePath);
+                User owner = file.getOwner();
+                owner.getFiles().remove(file);
+                userRepository.save(owner);
+
+            } catch (IOException e) {
+                if (e instanceof NoSuchFileException) {
+                    User owner = file.getOwner();
+                    owner.getFiles().remove(file);
+                    userRepository.save(owner);
+                    return;
+                }
+                throw e;
+            }
         }
     }
 
     public List<File> getFilesByUserId(Long userId) {
         List<File> files = new ArrayList<>();
         files.addAll(fileRepository.findByOwnerId(userId));
-        files.addAll(fileRepository.findAllByCoworkerId(userId));
+        files.addAll(fileRepository.findAllByCoworkerUserId(userId));
         return files;
     }
 
     @Transactional
     public void addCoworkerToFile(Long fileId, String email) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) auth.getPrincipal();
+
         File file = fileRepository.findById(fileId)
                 .orElseThrow(() -> new RuntimeException("File not found with ID: " + fileId));
 
-        User coworker = userService.findUserByLogin(email);
+        if (file.getOwner().getId() == currentUser.getId()) {
+            throw new RuntimeException("Can not share to owner");
+        }
+
+        User coworkerUser = userService.findUserByLogin(email);
+
+        Coworker coworker = new Coworker();
+        coworker.setUserID(coworkerUser.getId());
+        coworker.setEmail(coworkerUser.getLogin());
+        coworker.setAuthority(FileAuthority.READ);
+        coworker.setFile(file);
+
         file.getCoworkers().add(coworker);
         fileRepository.save(file);
     }

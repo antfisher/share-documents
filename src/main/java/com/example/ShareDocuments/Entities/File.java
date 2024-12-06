@@ -1,14 +1,11 @@
 package com.example.ShareDocuments.Entities;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.Set;
 
 @Table()
@@ -29,16 +26,10 @@ public class File {
 
     @ManyToOne
     @JoinColumn(
-            name = "owner_id",
-            referencedColumnName = "id"
+            name = "owner_id", nullable = false
     )
     private User owner;
 
-    @ManyToMany
-    @JoinTable(
-            name = "coworkers",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "file_id")
-    )
-    private Set<User> coworkers;
+    @OneToMany(mappedBy = "file", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Coworker> coworkers;
 }

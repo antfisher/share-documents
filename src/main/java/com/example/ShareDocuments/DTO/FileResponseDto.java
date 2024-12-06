@@ -1,5 +1,6 @@
 package com.example.ShareDocuments.DTO;
 
+import com.example.ShareDocuments.Entities.Coworker;
 import com.example.ShareDocuments.Entities.File;
 
 import java.util.Set;
@@ -11,7 +12,7 @@ public record FileResponseDto(
         String name,
         String type,
         Long ownerID,
-        Set<Long> coworkers
+        Set<CoworkerDto> coworkers
 ) {
 
     public static FileResponseDto fromFile(File file) {
@@ -21,7 +22,7 @@ public record FileResponseDto(
                 file.getName(),
                 file.getType(),
                 file.getOwner().getId(),
-                file.getCoworkers().stream().map(o -> o.getId()).collect(Collectors.toSet())
+                file.getCoworkers().stream().map(Coworker::toDto).collect(Collectors.toSet())
         );
     }
 }

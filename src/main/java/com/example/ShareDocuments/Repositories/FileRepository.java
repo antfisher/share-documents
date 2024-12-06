@@ -12,7 +12,7 @@ public interface FileRepository extends JpaRepository<File, Long> {
    @Override
    Optional<File> findById(Long id);
    List<File> findByOwnerId(Long ownerId);
-
-   @Query("SELECT f FROM files f JOIN f.coworkers c WHERE c.id = :coworkerId")
-   List<File> findAllByCoworkerId(@Param("coworkerId") Long coworkerId);
+   
+   @Query("SELECT f FROM files f JOIN f.coworkers c WHERE c.userID = :userId")
+   List<File> findAllByCoworkerUserId(@Param("userId") Long userId);
 }

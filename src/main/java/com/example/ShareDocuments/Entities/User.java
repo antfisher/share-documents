@@ -36,11 +36,8 @@ public class User implements UserDetails {
     private UserRole role;
 
     @Setter
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Collection<File> files;
-
-    @ManyToMany(mappedBy = "coworkers", fetch = FetchType.EAGER)
-    private Set<File> sharedFiles;
 
     public User(String login, String password, UserRole role) {
         this.login = login;
@@ -94,22 +91,12 @@ public class User implements UserDetails {
     public UserDto getUserDto() {
         Set<String> sharedFiles = Collections.emptySet();
 
-        if (this.sharedFiles != null) {
-            try {
-                sharedFiles = this.sharedFiles.stream().map(f -> f.getPath()).collect(Collectors.toSet());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
         return new UserDto(
                 id,
                 login,
                 firstName,
                 lastName,
-                role,
-                files.stream().map(f -> f.getPath()).collect(Collectors.toSet()),
-                sharedFiles
+                role
         );
     }
 }
