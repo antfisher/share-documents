@@ -11,6 +11,6 @@ Main features:
 - [x] Creating files
 - [x] Sharing files with other users
 - [ ] Inform a user in real-time that somebody shared a file with him. Probably using SSE (Server sent events)
-- [ ] Remove file
+- [x] Remove file
 - [ ] File format validation
 - [ ] Support other formats than PDF
