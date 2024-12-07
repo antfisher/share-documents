@@ -2,6 +2,7 @@ package com.example.ShareDocuments.Services;
 
 import com.example.ShareDocuments.Entities.User;
 import com.example.ShareDocuments.Repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,11 +23,13 @@ public class UserService {
         return repository.findUserByLogin(login);
     }
 
+    @Transactional
     public User updateUser(User user, String firstName, String lastName) {
-        if (!firstName.isEmpty() && firstName != null) {
+
+        if (firstName != null && !firstName.isEmpty()) {
             user.setFirstName(firstName);
         }
-        if (!lastName.isEmpty() && lastName != null) {
+        if (lastName != null && !lastName.isEmpty()) {
             user.setLastName(lastName);
         }
         repository.save(user);

@@ -128,8 +128,12 @@ public class FileService {
         File file = fileRepository.findById(fileId)
                 .orElseThrow(() -> new RuntimeException("File not found with ID: " + fileId));
 
-        if (file.getOwner().getId() == currentUser.getId()) {
-            throw new RuntimeException("Can not share to owner");
+        if (file.getOwner().getId() != currentUser.getId()) {
+            throw new RuntimeException("Only owner can share files");
+        }
+
+        if (currentUser.getLogin() == email) {
+            throw new RuntimeException("You can't share to yourself");
         }
 
         User coworkerUser = userService.findUserByLogin(email);
