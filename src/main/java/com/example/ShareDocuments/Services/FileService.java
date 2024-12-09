@@ -34,13 +34,15 @@ public class FileService {
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
     private final WorkingDirProvider workingDirProvider;
+    private final SSEService sseService;
 
-    public FileService(UserService userService, UserRepository userRepository,FileRepository fileRepository, ServletContext context, WorkingDirProvider workingDirProvider) {
+    public FileService(UserService userService, UserRepository userRepository,FileRepository fileRepository, ServletContext context, WorkingDirProvider workingDirProvider, SSEService sseService) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.fileRepository = fileRepository;
         this.context = context;
         this.workingDirProvider = workingDirProvider;
+        this.sseService = sseService;
     }
 
     public File getFileById(Long id) {
@@ -146,6 +148,7 @@ public class FileService {
 
         file.getCoworkers().add(coworker);
         fileRepository.save(file);
+        sseService.notifySubscribers();
     }
 
     private Path resolvePathById(String id) throws IOException {
